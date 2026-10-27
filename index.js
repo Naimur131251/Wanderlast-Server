@@ -38,6 +38,37 @@ app.get("/destinations", async (req, res) => {
   res.send(result);
 });
 
+app.get('/featured-destinations', async(req, res) => {
+  const result  = await destinationCollection.find().limit(5).toArray()
+  res.send(result)
+})
+
+app.get("/destination/:id", async (req, res) => {
+  const { id } = req.params;
+  const result = await destinationCollection.findOne({
+    _id: new ObjectId(id),
+  });
+  res.send(result);
+});
+
+app.patch("/destination/:id", async (req, res) => {
+  const { id } = req.params;
+  const data = req.body;
+  const result = await destinationCollection.updateOne(
+    { _id: new ObjectId(id) },
+    { $set: data },
+  );
+  res.json(result);
+});
+
+app.delete("/destination/:id", async (req, res) => {
+  const { id } = req.params;
+  const result = await destinationCollection.deleteOne({
+    _id: new ObjectId(id),
+  });
+  res.json(result);
+});
+
 app.get("/", (req, res) => {
   res.send({ message: "Server is running fine!" });
 });
