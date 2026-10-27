@@ -27,10 +27,54 @@ const mongoClient = await connectToMongoDB();
 const db = mongoClient.db("wanderlast");
 const destinationCollection = db.collection("destination");
 
+// app.post("/add-destination", async (req, res) => {
+//   const data = req.body;
+//   const result = await destinationCollection.insertOne(data);
+//   res.send(result);
+// });
+
 app.post("/add-destination", async (req, res) => {
-  const data = req.body;
-  const result = await destinationCollection.insertOne(data);
-  res.send(result);
+  try {
+    const data = req.body;
+
+    // Check required fields
+    if (!data.name?.trim() || !data.country?.trim()) {
+      return res.status(400).json({
+        message: "Destination name and country are required.",
+      });
+    }
+
+    // Check duplicate destination
+    const existingDestination = await destinationCollection.findOne({
+      name: { $regex: `^${data.name.trim()}$`, $options: "i" },
+      country: { $regex: `^${data.country.trim()}$`, $options: "i" },
+    });
+
+    if (existingDestination) {
+      return res.status(409).json({
+        message:
+          "This destination already exists. Please choose another destination.",
+      });
+    }
+
+    // Insert only if it does not exist
+    const result = await destinationCollection.insertOne({
+      ...data,
+      name: data.name.trim(),
+      country: data.country.trim(),
+    });
+
+    return res.status(201).json({
+      message: "Destination added successfully!",
+      insertedId: result.insertedId,
+    });
+  } catch (error) {
+    console.error("Add destination error:", error);
+
+    return res.status(500).json({
+      message: "Failed to add destination.",
+    });
+  }
 });
 
 app.get("/destinations", async (req, res) => {
