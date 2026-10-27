@@ -1,5 +1,5 @@
 import express from "express";
-import { MongoClient } from "mongodb";
+import { MongoClient, ObjectId } from "mongodb";
 import cors from "cors";
 import "dotenv/config";
 
@@ -38,10 +38,10 @@ app.get("/destinations", async (req, res) => {
   res.send(result);
 });
 
-app.get('/featured-destinations', async(req, res) => {
-  const result  = await destinationCollection.find().limit(5).toArray()
-  res.send(result)
-})
+app.get("/featured-destinations", async (req, res) => {
+  const result = await destinationCollection.find().limit(5).toArray();
+  res.send(result);
+});
 
 app.get("/destination/:id", async (req, res) => {
   const { id } = req.params;
@@ -77,4 +77,4 @@ app.listen(PORT, () => {
   console.log(`Server is running at ${PORT}`);
 });
 
-export default app
+export default app;
